@@ -61,7 +61,7 @@ public:
 
 int main()
 {
-	srand((unsigned)time(NULL));
+	srand((unsigned)time(NULL));//根据系统时间生成随机数种子
 	
 	Genetic_Algorithm GA1;
 	GA1.GA();
@@ -119,7 +119,8 @@ void Genetic_Algorithm::Initial_Population()
 	{
 		temp_city.push_back(i + 1);
 	}
-	//②打乱后生成初始种群
+	//②打乱后生成初始种群，
+    //交换后的结果直接存入population[][]，这个一次的变化是大，但是开销也不低，N*C*O(random_shuffle)
 	for (i = 0; i < N; i++)
 	{
 		random_shuffle(temp_city.begin(), temp_city.end());
@@ -140,6 +141,7 @@ void Genetic_Algorithm::Initial_Population()
 	cout << endl;
 }
 /*《Fitness函数定义：对传入解计算适应度值》*/
+//直接取应该要比这临时算好啊。根据city_position直接算出两两之间的距离，然后存在一个C*C的矩阵中，会更好。
 double Genetic_Algorithm::Fitness(int* input_solution)
 {
 	//①初始化路径长度
