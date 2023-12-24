@@ -6,9 +6,6 @@ using namespace std;
 #include<vector>
 #include<algorithm>
 
-
-
-
 #define N 10					//种群大小（解个数）
 #define C 10					//城市个数
 #define T 10					//染色体基因个数（T=K+LV+1）
@@ -38,7 +35,7 @@ public:
 	int cross_population[N][T];		//N-T,交叉子代种群
 	int muta_population[N][T];		//N-T,变异子代种群
 	int mix_population[N][T];		//N-T,混合种群
-    int big_population[N + N][T];			//融合population和muta_population
+	int big_population[N + N][T];			//融合population和muta_population
 
 	/*《函数GA申明：遗传算法主体》*/
 	void GA();
@@ -63,23 +60,6 @@ public:
 	void Mixing_population();
 };
 
-int main()
-{
-	srand((unsigned)time(NULL));
-	
-	Genetic_Algorithm GA1;
-	GA1.GA();
-
-    //输出最优解
-
-    for (int i=0;i<T;i++)
-    {
-        cout<<GA1.big_population[0][i]<<" ";
-    }
-   
-	return 0;
-
-}
 /*《函数GA定义：遗传算法主体》*/
 void Genetic_Algorithm::GA()
 {
@@ -575,8 +555,6 @@ void Genetic_Algorithm::Best_Solution()
 	cout << big_population[min_index][0] << endl;
 	cout << "适应值为：" << big_fitness[min_index] << endl;
 
-
-
 }
 /*《函数Mixing_population声明：为下一迭代准备新的种群》
 	构成：70%来自变异种群，20%来自初始种群，10%来自新产生个体。*/
@@ -705,8 +683,149 @@ void Genetic_Algorithm::Mixing_population()
 	}
 	cout << endl;
 
+}
+
+//上面是GA函数的实现，下面实现gui交互
+
+//GUI交互
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Box.H>
+#include <FL/Fl_JPEG_Image.H>
+#include <FL/Fl_PNG_Image.H>
+#include <FL/fl_draw.H>
+#include <FL/Fl_Scroll.H>
+#include <FL/Fl_Output.H>
+#include <vector>
+#include<FL/Fl_Input.H>
+#include<FL/Fl_Button.H>
+#include <cmath>
+#include <string>
+#include <iostream>
+#include <iomanip>
 
 
-    
+
+class tsp_gui : public Fl_Window{
+	public:
+	Fl_PNG_Image *image;
+	vector<pair<int,int>> points;
+	bool completed = false;
+	vector<int> best_solution;
+
+	tsp_gui(int w, int h, const char *title) : Fl_Window(w, h, title) {
+		image = new Fl_PNG_Image("map.png");
+
+	}
+
+void draw() {
+	image->draw(0,0,w(),h());
+	for (auto &p : points) {
+		fl_color(FL_RED);
+		fl_pie(p.first-5,p.second-5,10,10,0,360);
+	}
+
+	if (completed&&best_solution.size() == C) {
+		fl_color(FL_BLUE);
+		for (int i=0;i<C;i++)
+		{
+			//根据best_solution画出路径，取模是保证最后一个画回去了
+			fl_line(points[best_solution[i]-1].first,points[best_solution[i]-1].second,points[best_solution[(i+1)%C]-1].first,points[best_solution[(i+1)%C]-1].second);
+			
+		}
+
+	}
+}
+
+int handle(int event) {
+        switch (event) {
+            case FL_PUSH:
+                if (Fl::event_button() == FL_LEFT_MOUSE  ) {
+                    int x = Fl::event_x();
+                    int y = Fl::event_y();
+                    points.emplace_back(x, y);
+                    redraw();                   
+                }else{
+                    int x = Fl::event_x();
+                    int y = Fl::event_y();
+                    points.emplace_back(x, y);
+                }
+                return 1;
+            case FL_KEYDOWN:
+                if (Fl::event_key() == FL_Enter) {
+					if (points.size() != C) {
+						cout<<"请在地图上选取"<<C<<"个城市的坐标后再确认"<<endl;
+						return 1;
+					}
+                    if (points.size() > 2) {
+						//将points传入GA函数得到最后的结果
+						//其实就是把points的值给double citys_position[C][2]，然后调用GA函数
+						for (int i=0;i<C;i++)
+						{
+							citys_position[i][0]=points[i].first;
+							citys_position[i][1]=points[i].second;
+						}
+						completed = true;
+						//使用GA函数
+						Genetic_Algorithm GA1;
+						GA1.GA();
+						//输出最优解
+						cout<<"最优解为："<<endl;
+						for (int i=0;i<C;i++)
+						{cout<<GA1.big_population[0][i]<<"->";}
+						cout<<GA1.big_population[0][0]<<endl;
+						//输出最短路径
+						cout<<"最短路径为："<<endl;
+						cout<<GA1.Fitness(GA1.big_population[0])<<endl;
+						//根据points画再fltk上画出路径
+						//把big_population[0][i]的值给best_solution
+						for (int i=0;i<C;i++)
+						{
+							best_solution.push_back(GA1.big_population[0][i]);
+						}
+						completed = true;
+						redraw();
+                    }
+                }
+                return 1;
+            //实现撤销点
+            case FL_KEYUP:
+                if (Fl::event_key() == FL_BackSpace) {
+                    if (points.size() > 0) {
+                        points.pop_back();
+                        redraw();
+                    }
+                }
+                return 1;
+            default:
+                return Fl_Window::handle(event);
+        }
+    }
+
+
+};
+
+
+//
+int main()
+{
+
+	cout<<"当前选择的城市个数为："<<C<<endl;
+	cout<<"请在地图上选取"<<C<<"个城市的坐标"<<endl;
+	cout<<"遗传算法的相关参数为"<<endl;
+	cout<<"种群个数："<<N<<endl;
+	cout<<"迭代次数："<<I<<endl;
+	cout<<"交叉率："<<cross_rate<<endl;
+	cout<<"变异率："<<muta_rate<<endl;
+
+
+	srand((unsigned)time(NULL));
+
+	tsp_gui *window = new tsp_gui(800, 600, "TSP");
+	window->show();
+	return Fl::run();
+
+   
+	return 0;
 
 }
