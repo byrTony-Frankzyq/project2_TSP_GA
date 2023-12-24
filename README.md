@@ -1,5 +1,5 @@
 ---
-marp: false
+marp: true
 ---
 
 # project问题陈述
@@ -110,13 +110,6 @@ $d = f(x_1,x_2,x_3,...,x_i,...x_j,...,x_{n+1})=\sum_{i=1}^{n} d_{x_i,x_{i+1}}$
 
 https://zhuanlan.zhihu.com/p/277404168
 
-
-
-
-
-
-
-
 ## 编译和使用
 ```bash
 make
@@ -127,6 +120,7 @@ make
 - Enter表示结束（如果城市的个数和宏定义的N不同，则会返回提醒。
 - 按Backspace键来删除上一个点。
 ## 自测运行
+---
 
 ## demo1 中国地图  30个点
 <!-- 图片指定宽度，然后保持长宽比不变 -->
@@ -135,23 +129,25 @@ make
 
 
 
-
+---
 如果点击的点少于30个，如图所示 
 
 
 ![Alt text](image-1.png)
 
-
+---
 则会如下提示
 ![Alt text](image-2.png)
 
+---
 选定30个点后，按下enter键，会在终端输出最短路径的长度，以及路径的顺序，如图所示
 
 ![Alt text](image-3.png)
 
-
+---
 ![Alt text](image-4.png)
 
+---
 ## demo2 海贼王地图 10个点
 
 其它使用方法和demo1相同，如图所示,此处仅贴出最终结果
