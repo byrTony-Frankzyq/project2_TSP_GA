@@ -8,7 +8,7 @@ using namespace std;
 
 #define N 10					//种群大小（解个数）
 #define C 10					//城市个数
-#define T 10					//染色体基因个数（T=K+LV+1）
+#define T 10					//染色体基因个数（T=K+LV+1） T和C相等修改的时候保持一致
 #define cross_rate 0.75			//交叉率
 #define muta_rate 0.1			//变异率
 #define I 200					//迭代次数
@@ -714,22 +714,25 @@ class tsp_gui : public Fl_Window{
 	vector<int> best_solution;
 
 	tsp_gui(int w, int h, const char *title) : Fl_Window(w, h, title) {
-		image = new Fl_PNG_Image("map.png");
+		image = new Fl_PNG_Image("onepiece_map.png");
 
 	}
 
 void draw() {
 	image->draw(0,0,w(),h());
 	for (auto &p : points) {
-		fl_color(FL_RED);
+		fl_color(FL_BLUE);
 		fl_pie(p.first-5,p.second-5,10,10,0,360);
 	}
 
 	if (completed&&best_solution.size() == C) {
-		fl_color(FL_BLUE);
+		fl_color(FL_YELLOW);
 		for (int i=0;i<C;i++)
 		{
 			//根据best_solution画出路径，取模是保证最后一个画回去了
+			//线画粗一点，更明显
+			fl_line_style(FL_SOLID, 3);
+
 			fl_line(points[best_solution[i]-1].first,points[best_solution[i]-1].second,points[best_solution[(i+1)%C]-1].first,points[best_solution[(i+1)%C]-1].second);
 			
 		}
@@ -755,6 +758,7 @@ int handle(int event) {
                 if (Fl::event_key() == FL_Enter) {
 					if (points.size() != C) {
 						cout<<"请在地图上选取"<<C<<"个城市的坐标后再确认"<<endl;
+						cout<<"您当前选择的城市个数为："<<points.size()<<endl;
 						return 1;
 					}
                     if (points.size() > 2) {
@@ -821,7 +825,7 @@ int main()
 
 	srand((unsigned)time(NULL));
 
-	tsp_gui *window = new tsp_gui(800, 600, "TSP");
+	tsp_gui *window = new tsp_gui(1000, 800, "TSP");
 	window->show();
 	return Fl::run();
 
